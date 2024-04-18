@@ -53,13 +53,13 @@ class IRover {
 
     // [TODO] temp cppyy super().__init__() fix
     virtual void act(const ActionType&) {}
+    Point m_position;
 
    protected:
     virtual void tick() {}
 
    private:
     double m_obs_radius;
-    Point m_position;
     std::vector<Point> m_path;
 };
 
@@ -74,6 +74,15 @@ class Rover final : public IRover {
     using RType = thyme::utilities::SharedWrap<RewardType>;
     using ActionType = Eigen::MatrixXd;
    public:
+    // I can set observation radius of this rover.
+    // What does observation radius mean here?
+    // obs_radius as in how far can the rover sense POIs and other rovers?
+    // OR obs_radius as in how far can a POI be and the rover can still "observe" it for G?
+    // sensor types can be defined - interesting idea for different agents to have
+    // different sensors. For now, let's just do standard density sensors
+    // did not know reward could be defined based on type
+    // We can do things like give some agents G, some agents D, and some D-Indirect, and some
+    // an entirely different reward
     Rover(double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
         : IRover(obs_radius), m_sensor(sensor), m_reward(reward) {}
 

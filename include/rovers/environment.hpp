@@ -75,6 +75,9 @@ class Environment {
     const size_t& height() { return m_height; }
     // TODO add pre/post update for all components
 
+    std::vector<Agent> m_rovers;
+    std::vector<Entity> m_pois;
+
    private:
     inline void clamp_bounds(Agent& rover) {
         rover->set_position(std::clamp(rover->position().x, 0.0, 1.0 * m_width),
@@ -94,9 +97,6 @@ class Environment {
 
    private:
     InitPolicy m_initPolicy;
-    std::vector<Agent> m_rovers;
-    std::vector<Entity> m_pois;
-
     size_t m_width;
     size_t m_height;
 };

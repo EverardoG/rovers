@@ -38,11 +38,11 @@ class IPOI {
 
     [[nodiscard]] virtual bool constraint_satisfied(const EntityPack&) const = 0;
 
+    Point m_position;
    protected:
     virtual void tick() {}
 
    private:
-    Point m_position;
     double m_value;
 
     double m_obs_radius;

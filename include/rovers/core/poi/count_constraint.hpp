@@ -22,6 +22,7 @@ class CountConstraint {
             double dist = l2_norm(rover->position(), entity_pack.entity->position());
             if (dist <= rover->obs_radius() && dist <= entity_pack.entity->obs_radius()) {
                 ++count;
+                // Basically, check how many rovers 
                 if (count >= count_constraint) return true;
             }
         }
