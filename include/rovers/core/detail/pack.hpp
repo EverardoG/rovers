@@ -16,7 +16,7 @@ namespace rovers {
 struct AgentPack {
     AgentPack(const Agent& agent, const std::vector<Agent>& agents,
               const std::vector<Entity>& entities)
-        : agent(agent), agents(agents), entities(entities) {}
+        : agent(agent), agents(agents), entities(entities) {std::cout << "AgentPack Memory address of agent: " << &agent << std::endl;}
     Agent agent;
     std::vector<Agent> agents;
     std::vector<Entity> entities;

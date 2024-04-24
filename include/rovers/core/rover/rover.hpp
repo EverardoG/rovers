@@ -90,6 +90,7 @@ class Rover final : public IRover {
         return m_sensor->scan(pack);
     }
     [[nodiscard]] virtual double reward(const AgentPack& pack) const override {
+        std::cout << "reward()" << std::endl;
         return m_reward->compute(pack);
     }
     void act(const ActionType& action) override {

@@ -64,9 +64,10 @@ class POI final : public IPOI {
     [[nodiscard]] bool constraint_satisfied(const EntityPack& entity_pack) const override {
         return m_constraint.is_satisfied(entity_pack);
     }
-
-   private:
     ConstraintPolicy m_constraint;
+
+//    private:
+    
 };
 }  // namespace rovers
 

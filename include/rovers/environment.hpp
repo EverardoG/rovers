@@ -85,13 +85,28 @@ class Environment {
     }
 
     std::tuple<State, Reward> status() {
+        std::cout << "-----Start status()--------" << std::endl;
         // observations and rewards
         State state;
         Reward rewards;
-        for (auto& r : m_rovers) {
-            state.push_back(r->scan({r, m_rovers, m_pois}));
-            rewards.push_back(r->reward({r, m_rovers, m_pois}));
+        for (const Agent& r : m_rovers) {
+            // Construct the AgentPack on the fly
+            const AgentPack pack = {r, m_rovers, m_pois};
+
+            std::cout << "memory of AgentPack before scan(): " << &pack << std::endl;
+
+            // std::cout << "memory address of r before scan(): " << &r << std::endl;
+            // state.push_back(r->scan({r, m_rovers, m_pois}));
+            state.push_back(r->scan(pack));
+
+            std::cout << "memory of AgentPack before reward(): " << &pack << std::endl;
+            std::cout << "memory of agent: " << &pack.agents << std::endl;
+
+            // std::cout << "memory address of r before reward(): " << &r << std::endl;
+            // rewards.push_back(r->reward({r, m_rovers, m_pois}));
+            rewards.push_back(r->reward(pack));
         }
+        std::cout << "End status() ----" << std::endl;
         return {state, rewards};
     }
 

@@ -17,12 +17,17 @@ class Global {
         // TODO Keep filtering over this view for speed-up
         double reward = 0.0;
         for (const auto& poi : pack.entities) {
-            if (poi->observed()) continue;
+            // std::cout << "Checking poi" << std::endl;
+            // if (poi->observed()) {std::cout << "Poi is observed" << std::endl; continue;}
+            // else{std::cout << "POI is not observed" << std::endl;}
 
             if (poi->constraint_satisfied({poi, pack.agents, pack.entities})) {
                 poi->set_observed(true);  // TDDO emit signal to POI instead.
                 reward += poi->value();
             }
+            // else{
+            //     // std::cout << "POI constraint is not satisfied" << std::endl;
+            // }
         }
         return reward;
     }
