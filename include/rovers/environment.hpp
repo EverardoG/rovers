@@ -75,9 +75,6 @@ class Environment {
     const size_t& height() { return m_height; }
     // TODO add pre/post update for all components
 
-    std::vector<Agent> m_rovers;
-    std::vector<Entity> m_pois;
-
    private:
     inline void clamp_bounds(Agent& rover) {
         rover->set_position(std::clamp(rover->position().x, 0.0, 1.0 * m_width),
@@ -85,33 +82,23 @@ class Environment {
     }
 
     std::tuple<State, Reward> status() {
-        std::cout << "-----Start status()--------" << std::endl;
         // observations and rewards
         State state;
         Reward rewards;
-        for (const Agent& r : m_rovers) {
+        for (int i = 0; i < m_rovers.size(); ++i) {
             // Construct the AgentPack on the fly
-            const AgentPack pack = {r, m_rovers, m_pois};
-
-            std::cout << "memory of AgentPack before scan(): " << &pack << std::endl;
-
-            // std::cout << "memory address of r before scan(): " << &r << std::endl;
-            // state.push_back(r->scan({r, m_rovers, m_pois}));
-            state.push_back(r->scan(pack));
-
-            std::cout << "memory of AgentPack before reward(): " << &pack << std::endl;
-            std::cout << "memory of agent: " << &pack.agents << std::endl;
-
-            // std::cout << "memory address of r before reward(): " << &r << std::endl;
-            // rewards.push_back(r->reward({r, m_rovers, m_pois}));
-            rewards.push_back(r->reward(pack));
+            const AgentPack pack = {i, m_rovers, m_pois};
+            state.push_back(m_rovers[i]->scan(pack));
+            rewards.push_back(m_rovers[i]->reward(pack));
         }
-        std::cout << "End status() ----" << std::endl;
         return {state, rewards};
     }
 
    private:
     InitPolicy m_initPolicy;
+    std::vector<Agent> m_rovers;
+    std::vector<Entity> m_pois;
+
     size_t m_width;
     size_t m_height;
 };

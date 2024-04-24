@@ -2,7 +2,6 @@
 #define THYME_ENVIRONMENTS_ROVERS_INIT_CUSTOM
 
 #include <cmath>
-// #include <ranges>
 
 namespace rovers {
 
@@ -13,11 +12,8 @@ namespace rovers {
  */
 class CustomInit {
    public:
-    CustomInit(std::vector<std::vector<double>> rover_positions = {}, std::vector<std::vector<double>> poi_positions = {}) : m_rover_positions(rover_positions), m_poi_positions(poi_positions) {
-        // std::cout << "custominit: " << m_rover_positions[0][0] << std::endl;
-    }
+    CustomInit(std::vector<std::vector<double>> rover_positions = {}, std::vector<std::vector<double>> poi_positions = {}) : m_rover_positions(rover_positions), m_poi_positions(poi_positions) {}
 
-    // template <std::ranges::range RoverContainer, std::ranges::range POIContainer>
     template <typename RoverContainer, typename POIContainer>
     void initialize(RoverContainer& rovers, POIContainer& pois) {
         initialize_rovers(rovers);

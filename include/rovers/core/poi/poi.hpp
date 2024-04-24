@@ -38,11 +38,11 @@ class IPOI {
 
     [[nodiscard]] virtual bool constraint_satisfied(const EntityPack&) const = 0;
 
-    Point m_position;
    protected:
     virtual void tick() {}
 
    private:
+    Point m_position;
     double m_value;
 
     double m_obs_radius;
@@ -64,10 +64,9 @@ class POI final : public IPOI {
     [[nodiscard]] bool constraint_satisfied(const EntityPack& entity_pack) const override {
         return m_constraint.is_satisfied(entity_pack);
     }
-    ConstraintPolicy m_constraint;
 
-//    private:
-    
+   private:
+    ConstraintPolicy m_constraint;
 };
 }  // namespace rovers
 

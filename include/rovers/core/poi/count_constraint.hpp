@@ -14,7 +14,7 @@ namespace rovers {
  */
 class CountConstraint {
    public:
-    explicit CountConstraint(size_t count = 1) : count_constraint(count) {}
+    explicit CountConstraint(size_t count = 3) : count_constraint(count) {}
 
     [[nodiscard]] bool is_satisfied(const EntityPack& entity_pack) const {
         size_t count = 0;
@@ -22,17 +22,14 @@ class CountConstraint {
             double dist = l2_norm(rover->position(), entity_pack.entity->position());
             if (dist <= rover->obs_radius() && dist <= entity_pack.entity->obs_radius()) {
                 ++count;
-                // Basically, check how many rovers 
                 if (count >= count_constraint) return true;
-                std::cout << count << std::endl;
             }
         }
         return false;
     }
 
+   private:
     size_t count_constraint;
-//    private:
-    
 };
 
 }  // namespace rovers

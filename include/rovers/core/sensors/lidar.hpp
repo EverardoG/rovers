@@ -62,7 +62,7 @@ class Lidar {
     [[nodiscard]] Eigen::MatrixXd scan(const AgentPack& pack) const {
         const std::size_t num_sectors = 360 / m_resolution;
         std::vector<std::vector<double>> poi_values(num_sectors), rover_values(num_sectors);
-        auto& rover = pack.agent;  // convenient handle
+        auto& rover = pack.agents[pack.agent_index];  // convenient handle
 
         // observe pois
         for (const auto& sensed_poi : pack.entities) {
@@ -76,11 +76,13 @@ class Lidar {
         }
 
         // observe rovers
-        for (const auto& sensed_rover : pack.agents) {
-            if (&sensed_rover == &rover) continue;
+        for (int i = 0; i < pack.agents.size(); ++i) {
+            // Do not observe yourself
+            if (i == pack.agent_index) continue;
 
+            auto& sensed_rover = pack.agents[i];  //convenient handle
             auto [angle, distance] = thyme::math::l2a(rover->position(), sensed_rover->position());
-            if (distance > rover->obs_radius() || distance == 0) continue;
+            if (distance > rover->obs_radius()) continue;
 
             int sector = angle / m_resolution;
             rover_values[sector].push_back(1.0 / std::max(0.001, distance * distance));
