@@ -27,7 +27,10 @@ class IPOI {
     const double& value() const { return m_value; }
     const double& obs_radius() const { return m_obs_radius; }
 
-    void set_observed(bool observed) { m_observed = observed; }
+    void set_observed(bool observed) { 
+        // std::cout << "IPOI::set_observed()" << std::endl;
+        m_observed = observed; 
+    }
     const bool& observed() const { return m_observed; }
 
     void update() {
@@ -62,6 +65,7 @@ class POI final : public IPOI {
         : IPOI(value, obs_radius), m_constraint(constraint) {}
 
     [[nodiscard]] double constraint_satisfied(const EntityPack& entity_pack) const override {
+        // std::cout << "POI::constraint_satisfied()" << std::endl;
         return m_constraint.is_satisfied(entity_pack);
     }
 

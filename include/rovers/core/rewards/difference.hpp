@@ -14,6 +14,7 @@ namespace rovers::rewards {
 class Difference {
    public:
     [[nodiscard]] double compute(const AgentPack& pack) const {
+        // std::cout << "Difference::compute()" << std::endl;
         double reward = Global().compute(pack);
         // Make a vector of agents with the appropriate agent removed
         std::vector<Agent> agents_without_me;
@@ -22,6 +23,7 @@ class Difference {
                 agents_without_me.push_back(pack.agents[i]);
             }
         }
+        // std::cout << "Difference::compute() | Built pack_without_me" << std::endl;
         // Make a new agentpack. Use dummy variable for agent index.
         const AgentPack& pack_without_me = AgentPack(0, agents_without_me, pack.entities);
         double reward_without_me = Global().compute(pack_without_me);

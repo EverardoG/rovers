@@ -13,13 +13,18 @@ namespace rovers::rewards {
 class Global {
    public:
     [[nodiscard]] double compute(const AgentPack& pack) const {
+        // std::cout << "Global::compute()" << std::endl;
         // TODO pass in a view of POIContainer filtered by observed()
         // TODO Keep filtering over this view for speed-up
         double reward = 0.0;
-        for (const auto& poi : pack.entities) {
-            // if (poi->observed()) continue;
-            reward = reward + poi->value()*poi->constraint_satisfied({poi, pack.agents, pack.entities});
+        for (int i = 0; i < pack.entities.size(); ++i) {
+            reward = reward + pack.entities[i]->value()*pack.entities[i]->constraint_satisfied({pack.entities[i], pack.agents, pack.entities});
         }
+        // for (const auto& poi : pack.entities) {
+        //     // if (poi->observed()) continue;
+        //     reward = reward + poi->value()*poi->constraint_satisfied({poi, pack.agents, pack.entities});
+        // }
+        // std::cout << "Global::compute() | Finished poi iteration" << std::endl;
         // reset pois
         // for (const auto& poi : pack.entities) poi->set_observed(false);
         return reward;

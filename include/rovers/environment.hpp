@@ -58,6 +58,7 @@ class Environment {
     }
 
     std::tuple<State, Reward> reset() {
+        // std::cout << "Environment::reset()" << std::endl;
         // clear agents
         for (auto& r : m_rovers) r->reset();
         // reset pois
@@ -82,15 +83,20 @@ class Environment {
     }
 
     std::tuple<State, Reward> status() {
+        // std::cout << "Environment::status()" << std::endl;
         // observations and rewards
         State state;
         Reward rewards;
+        // std::cout << "Environment::status() | m_rovers.size() | " << m_rovers.size() << std::endl;
         for (int i = 0; i < m_rovers.size(); ++i) {
+            // std::cout << "Environment::status() | i | " << i << std::endl;
             // Construct the AgentPack on the fly
             const AgentPack pack = {i, m_rovers, m_pois};
+            // std::cout << "pack" << std::endl;
             state.push_back(m_rovers[i]->scan(pack));
             rewards.push_back(m_rovers[i]->reward(pack));
         }
+        // std::cout << "Environment::status() | Finished iterating through rovers" << std::endl;
         return {state, rewards};
     }
 

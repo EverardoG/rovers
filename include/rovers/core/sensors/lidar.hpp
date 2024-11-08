@@ -61,6 +61,7 @@ class Lidar : public ISensor {
         : m_resolution(resolution), m_composition(composition_policy) {}
 
     [[nodiscard]] Eigen::MatrixXd scan(const AgentPack& pack) const {
+        // std::cout << "Lidar::scan()" << std::endl;
         const std::size_t num_sectors = 360 / m_resolution;
         std::vector<std::vector<double>> poi_values(num_sectors), rover_values(num_sectors);
         auto& rover = pack.agents[pack.agent_index];  // convenient handle

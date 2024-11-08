@@ -26,7 +26,10 @@ class IRover {
     IRover(double obs_radius = 1.0) : m_obs_radius(obs_radius) {}
     virtual ~IRover() = default;
 
-    void reset() { m_path.clear(); }
+    void reset() { 
+        // std::cout << "IRover::reset()" << std::endl;
+        m_path.clear(); 
+        }
 
     const Point& position() const { return m_position; }
     void set_position(double x, double y) {
@@ -74,13 +77,15 @@ class Rover final : public IRover {
     using RType = thyme::utilities::SharedWrap<RewardType>;
     using ActionType = Eigen::MatrixXd;
    public:
-    Rover(double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
-        : IRover(obs_radius), m_sensor(sensor), m_reward(reward) {}
+    Rover(std::string type, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
+        : IRover(obs_radius), m_sensor(sensor), m_reward(reward) {m_type = type;}
 
     [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack& pack) const override {
+        // std::cout << "Rover::scan()" << std::endl;
         return m_sensor->scan(pack);
     }
     [[nodiscard]] virtual double reward(const AgentPack& pack) const override {
+        // std::cout << "Rover::reward()" << std::endl;
         return m_reward->compute(pack);
     }
     void act(const ActionType& action) override {
@@ -89,10 +94,15 @@ class Rover final : public IRover {
         auto act = static_cast<Eigen::Vector2d>(action);
         update_position(act[0], act[1]);
     }
+    std::string type() {
+        // Give me the nominal type of this rover
+        return m_type;
+    }
 
    private:
     SType m_sensor;
     RType m_reward;
+    std::string m_type;
 };
 
 /*

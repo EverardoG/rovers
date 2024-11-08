@@ -17,6 +17,7 @@ class CountConstraint {
     explicit CountConstraint(size_t count = 3) : count_constraint(count) {}
 
     [[nodiscard]] double is_satisfied(const EntityPack& entity_pack) const {
+        std::cout << "CountConstraint::is_satisfied()" << std::endl; 
         bool constraint_satisfied = false;
         size_t count = 0;
         std::vector<double> dists;
@@ -29,6 +30,7 @@ class CountConstraint {
             }
         }
         if (constraint_satisfied) {
+            std::cout << "Constraint is satisfied" << std::endl;
             // Get the n closest rovers
 
             // Sort distances in ascending order (first values are lowest)
@@ -44,6 +46,7 @@ class CountConstraint {
             for (int i=0; i<count_constraint; ++i) {
                 constraint_value = constraint_value * 1.0/dists[i];
             }
+            std::cout << "constraint_value | " << constraint_value << std::endl;
             return constraint_value;
         }
         return 0.0;
