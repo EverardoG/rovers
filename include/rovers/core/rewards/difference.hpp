@@ -31,6 +31,15 @@ class Difference {
     }
 };
 
+// class IndirectDifference {
+//     public:
+//     [[nodiscard]] double compute(const AgentPack& pack) const {
+//         double reward = Global().compute(pack)
+//         // Figure out
+//         return reward;
+//     }
+// };
+
 }  // namespace rovers::rewards
 
 #endif

@@ -23,7 +23,9 @@ class IRover {
     using StateType = Eigen::MatrixXd;
 
    public:
-    IRover(double obs_radius = 1.0) : m_obs_radius(obs_radius) {}
+    IRover(std::string reward_type, std::string type_, double obs_radius = 1.0) : m_reward_type(reward_type), m_type(type_), m_obs_radius(obs_radius) {};
+    IRover(IRover&&) = default;
+    IRover(const IRover&) = default;
     virtual ~IRover() = default;
 
     void reset() { 
@@ -54,6 +56,14 @@ class IRover {
     [[nodiscard]] virtual StateType scan(const AgentPack&) const = 0;
     [[nodiscard]] virtual double reward(const AgentPack&) const = 0;
 
+    std::string type() {
+        // Give me the nominal type of this rover
+        return m_type;
+    }
+    std::string reward_type() {
+        return m_reward_type;
+    }
+
     // [TODO] temp cppyy super().__init__() fix
     virtual void act(const ActionType&) {}
 
@@ -61,6 +71,8 @@ class IRover {
     virtual void tick() {}
 
    private:
+    std::string m_reward_type;
+    std::string m_type;
     double m_obs_radius;
     Point m_position;
     std::vector<Point> m_path;
@@ -77,14 +89,18 @@ class Rover final : public IRover {
     using RType = thyme::utilities::SharedWrap<RewardType>;
     using ActionType = Eigen::MatrixXd;
    public:
-    Rover(std::string type, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
-        : IRover(obs_radius), m_sensor(sensor), m_reward(reward) {m_type = type;}
-
+    Rover(std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
+        : IRover(reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {
+        }
+        // There will be a reward type specified here
     [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack& pack) const override {
         // std::cout << "Rover::scan()" << std::endl;
         return m_sensor->scan(pack);
     }
     [[nodiscard]] virtual double reward(const AgentPack& pack) const override {
+        // each aget gets a reward set here but only nominally so the reward computer knows
+        // what to do
+        // but each agent is not comjputing its own reward
         // std::cout << "Rover::reward()" << std::endl;
         return m_reward->compute(pack);
     }
@@ -94,15 +110,10 @@ class Rover final : public IRover {
         auto act = static_cast<Eigen::Vector2d>(action);
         update_position(act[0], act[1]);
     }
-    std::string type() {
-        // Give me the nominal type of this rover
-        return m_type;
-    }
 
    private:
     SType m_sensor;
     RType m_reward;
-    std::string m_type;
 };
 
 /*
@@ -110,14 +121,14 @@ class Rover final : public IRover {
  * Example of bringing in a new Rover from the python bindings
  *
  */
-class Drone final : public IRover {
-   public:
-    Drone(double obs_radius = 1.0) : IRover(obs_radius) {}
+// class Drone final : public IRover {
+//    public:
+//     Drone(double obs_radius = 1.0) : IRover(obs_radius) {}
 
-    [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack&) const override { return {}; }
-    [[nodiscard]] virtual double reward(const AgentPack&) const override { return 0; }
-    void act(const Eigen::MatrixXd&) override { }
-};
+//     [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack&) const override { return {}; }
+//     [[nodiscard]] virtual double reward(const AgentPack&) const override { return 0; }
+//     void act(const Eigen::MatrixXd&) override { }
+// };
 
 }  // namespace rovers
 

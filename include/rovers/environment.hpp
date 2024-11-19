@@ -9,6 +9,7 @@
 #include <rovers/core/sensors/lidar.hpp>
 #include <rovers/core/setup/init_random.hpp>
 #include <rovers/utilities/spaces/discrete.hpp>
+#include <rovers/core/rewards/computer.hpp>
 #include <tuple>
 #include <vector>
 
@@ -32,7 +33,8 @@ class Environment {
           m_rovers(std::move(rovers)),
           m_pois(std::move(pois)),
           m_width(width),
-          m_height(height) {}
+          m_height(height),
+          m_reward_computer(m_rovers, m_pois) {}
 
     // helpers to set rovers/pois after the fact
     void set_rovers(std::vector<Agent> rovers) { m_rovers = std::move(rovers); }
@@ -76,17 +78,14 @@ class Environment {
     const size_t& height() { return m_height; }
     // TODO add pre/post update for all components
 
-   private:
-    inline void clamp_bounds(Agent& rover) {
-        rover->set_position(std::clamp(rover->position().x, 0.0, 1.0 * m_width),
-                            std::clamp(rover->position().y, 0.0, 1.0 * m_height));
-    }
-
     std::tuple<State, Reward> status() {
         // std::cout << "Environment::status()" << std::endl;
+        // Here we are going to use the reward computer to compute the rewards for each agent
+        // based on how it was configured earlier.
+        // Each agent can still get a completely different reward based on how we configure them
         // observations and rewards
         State state;
-        Reward rewards;
+        Reward rewards = m_reward_computer.compute();
         // std::cout << "Environment::status() | m_rovers.size() | " << m_rovers.size() << std::endl;
         for (int i = 0; i < m_rovers.size(); ++i) {
             // std::cout << "Environment::status() | i | " << i << std::endl;
@@ -94,16 +93,21 @@ class Environment {
             const AgentPack pack = {i, m_rovers, m_pois};
             // std::cout << "pack" << std::endl;
             state.push_back(m_rovers[i]->scan(pack));
-            rewards.push_back(m_rovers[i]->reward(pack));
+            // rewards.push_back(m_rovers[i]->reward(pack));
         }
         // std::cout << "Environment::status() | Finished iterating through rovers" << std::endl;
         return {state, rewards};
     }
 
    private:
+    inline void clamp_bounds(Agent& rover) {
+        rover->set_position(std::clamp(rover->position().x, 0.0, 1.0 * m_width),
+                            std::clamp(rover->position().y, 0.0, 1.0 * m_height));
+    }
     InitPolicy m_initPolicy;
     std::vector<Agent> m_rovers;
     std::vector<Entity> m_pois;
+    rewards::RewardComputer m_reward_computer;
 
     size_t m_width;
     size_t m_height;
