@@ -12,6 +12,33 @@
 
 namespace rovers {
 
+class AutomaticParameters {
+    public:
+    AutomaticParameters() = default;
+    AutomaticParameters(std::string timescale, std::string credit) {
+        m_timescale = timescale;
+        m_credit = credit;
+    }
+    std::string m_timescale;
+    std::string m_credit;
+};
+
+class IndirectDifferenceParameters {
+    public:
+    IndirectDifferenceParameters(std::string type_, std::string assignment, std::vector<int> manual, AutomaticParameters automatic_parameters) {
+        m_type = type_;
+        m_assignment = assignment;
+        m_manual = manual;
+        m_automatic_parameters = automatic_parameters;
+    }
+
+    std::string m_type;
+    std::string m_assignment;
+    std::vector<int> m_manual;
+    AutomaticParameters m_automatic_parameters;
+};
+
+
 /*
  *
  * rover interface
@@ -23,7 +50,7 @@ class IRover {
     using StateType = Eigen::MatrixXd;
 
    public:
-    IRover(std::string reward_type, std::string type_, double obs_radius = 1.0) : m_reward_type(reward_type), m_type(type_), m_obs_radius(obs_radius) {};
+    IRover(IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0) : m_indirect_difference_parameters(indirect_difference_parameters), m_reward_type(reward_type), m_type(type_), m_obs_radius(obs_radius) {};
     IRover(IRover&&) = default;
     IRover(const IRover&) = default;
     virtual ~IRover() = default;
@@ -64,6 +91,10 @@ class IRover {
         return m_reward_type;
     }
 
+    IndirectDifferenceParameters indirect_difference_parameters() {
+        return m_indirect_difference_parameters;
+    }
+
     // [TODO] temp cppyy super().__init__() fix
     virtual void act(const ActionType&) {}
 
@@ -76,6 +107,7 @@ class IRover {
     double m_obs_radius;
     Point m_position;
     std::vector<Point> m_path;
+    IndirectDifferenceParameters m_indirect_difference_parameters;
 };
 
 /*
@@ -89,8 +121,8 @@ class Rover final : public IRover {
     using RType = thyme::utilities::SharedWrap<RewardType>;
     using ActionType = Eigen::MatrixXd;
    public:
-    Rover(std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
-        : IRover(reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {
+    Rover(IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
+        : IRover(indirect_difference_parameters, reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {
         }
         // There will be a reward type specified here
     [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack& pack) const override {

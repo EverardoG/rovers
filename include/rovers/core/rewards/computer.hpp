@@ -74,7 +74,7 @@ class RewardComputer {
         for (int k=0; k < m_rovers.size(); ++k) {
             // std::cout << "RewardComputer::prep_all_or_nothing_influence() on agent k = " << k << std::endl;
             int highest_ind = -1;
-            int num_influence = -1;
+            int num_influence = 0;
 
             // std::cout << "Beginning iteration through counters[" << k << "].size()" << std::endl;
             for (int i=0; i < counters[k].size(); ++i) {
@@ -86,8 +86,9 @@ class RewardComputer {
             }
 
             // Who was agent k most influenced by?
-            // Agent i gets credit for influencing agent k
-            influence_sets[highest_ind].push_back(k);
+            // Agent i gets credit for influencing agent k (unless agent i == -1, meaning there was no agent that influenced agent k)
+            if (highest_ind != -1) {influence_sets[highest_ind].push_back(k);}
+            // influence_sets[highest_ind].push_back(k);
             // std::cout << "RewardComputer::prep_all_or_nothing_influence() Ran influence_sets[highest_ind].push_back(k) on k = " << k << std::endl;
         }
 
@@ -139,7 +140,12 @@ class RewardComputer {
                 // Assume that only rovers can count as being influenced
                 // Use all or nothing influence assignment. Just remove the entire trajectories.
                 // Refactor for more options later.
-                reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), influence_sets[i]);
+                if (m_rovers[i]->indirect_difference_parameters().m_assignment == "manual") {
+                    reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), m_rovers[i]->indirect_difference_parameters().m_manual);
+                }
+                else if (m_rovers[i]->indirect_difference_parameters().m_assignment == "automatic") {
+                    reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), influence_sets[i]);
+                }
             }
             rewards.push_back(reward);
         }
