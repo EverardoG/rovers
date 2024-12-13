@@ -15,7 +15,7 @@ class IPOI {
     using Point = thyme::math::Point;
 
    public:
-    IPOI(double value, double obs_radius) : m_value(value), m_obs_radius(obs_radius) {}
+    IPOI(double value, double obs_radius, double capture_radius) : m_value(value), m_obs_radius(obs_radius), m_capture_radius(capture_radius) {}
     virtual ~IPOI() = default;
 
     const Point& position() const { return m_position; }
@@ -26,6 +26,7 @@ class IPOI {
 
     const double& value() const { return m_value; }
     const double& obs_radius() const { return m_obs_radius; }
+    const double& capture_radius() const { return m_capture_radius; }
 
     void set_observed(bool observed) { 
         // std::cout << "IPOI::set_observed()" << std::endl;
@@ -49,6 +50,7 @@ class IPOI {
     double m_value;
 
     double m_obs_radius;
+    double m_capture_radius;
     bool m_observed{false};
 };
 
@@ -60,9 +62,9 @@ class IPOI {
 template <typename ConstraintPolicy>
 class POI final : public IPOI {
    public:
-    POI(double value = 1.0, double obs_radius = 1.0,
+    POI(double value = 1.0, double obs_radius = 1.0, double capture_radius = -1.0,
         ConstraintPolicy constraint = ConstraintPolicy())
-        : IPOI(value, obs_radius), m_constraint(constraint) {}
+        : IPOI(value, obs_radius, capture_radius), m_constraint(constraint) {}
 
     [[nodiscard]] double constraint_satisfied(const EntityPack& entity_pack) const override {
         // std::cout << "POI::constraint_satisfied()" << std::endl;
