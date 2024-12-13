@@ -43,7 +43,7 @@ class Environment {
     const std::vector<Agent>& rovers() { return m_rovers; }
     const std::vector<Entity>& pois() { return m_pois; }
 
-    std::tuple<State, Reward> step(std::vector<Action> actions) {
+    void perform_step(std::vector<Action> actions) {
         for (size_t i = 0; i < m_rovers.size(); ++i) {
             auto& rover = m_rovers[i];
             // call update for all rovers
@@ -55,8 +55,31 @@ class Environment {
         }
         // call update for pois
         for (auto& poi : m_pois) poi->update();
+    }
+
+    std::tuple<State, Reward> step(std::vector<Action> actions) {
+        perform_step(actions);
         // return next observations and rewards
         return status();
+    }
+
+    State step_without_rewards(std::vector<Action> actions) {
+        perform_step(actions);
+        // Just return observations
+        return observations();
+    }
+
+    State observations() {
+        State state;
+        for (int i = 0; i < m_rovers.size(); ++i) {
+            // std::cout << "Environment::status() | i | " << i << std::endl;
+            // Construct the AgentPack on the fly
+            const AgentPack pack = {i, m_rovers, m_pois};
+            // std::cout << "pack" << std::endl;
+            state.push_back(m_rovers[i]->scan(pack));
+            // rewards.push_back(m_rovers[i]->reward(pack));
+        }
+        return state;
     }
 
     std::tuple<State, Reward> reset() {
@@ -78,25 +101,14 @@ class Environment {
     const size_t& height() { return m_height; }
     // TODO add pre/post update for all components
 
+    Reward rewards() {
+        return m_reward_computer.compute();
+    }
+
     std::tuple<State, Reward> status() {
-        // std::cout << "Environment::status()" << std::endl;
-        // Here we are going to use the reward computer to compute the rewards for each agent
-        // based on how it was configured earlier.
-        // Each agent can still get a completely different reward based on how we configure them
-        // observations and rewards
-        State state;
-        Reward rewards = m_reward_computer.compute();
-        // std::cout << "Environment::status() | m_rovers.size() | " << m_rovers.size() << std::endl;
-        for (int i = 0; i < m_rovers.size(); ++i) {
-            // std::cout << "Environment::status() | i | " << i << std::endl;
-            // Construct the AgentPack on the fly
-            const AgentPack pack = {i, m_rovers, m_pois};
-            // std::cout << "pack" << std::endl;
-            state.push_back(m_rovers[i]->scan(pack));
-            // rewards.push_back(m_rovers[i]->reward(pack));
-        }
-        // std::cout << "Environment::status() | Finished iterating through rovers" << std::endl;
-        return {state, rewards};
+        // Give us the full status of the environment,
+        // including what every agent observes, and the rewards for each agent
+        return {observations(), rewards()};
     }
 
    private:
