@@ -1,4 +1,5 @@
 #ifndef THYME_ENVIRONMENTS_ROVERS_REWARD_COMPUTER
+
 #define THYME_ENVIRONMENTS_ROVERS_REWARD_COMPUTER
 
 #include <rovers/core/rewards/global.hpp>
@@ -13,10 +14,11 @@ class RewardComputer {
     public:
     using Reward = std::vector<double>;
 
-    RewardComputer(std::vector<Agent> rovers, std::vector<Entity> pois) {
+    RewardComputer(std::vector<Agent> rovers, std::vector<Entity> pois, bool debug_reward_equals_G) {
         // std::cout << "RewardComputer::RewardComputer()" << std::endl;
         m_rovers = rovers;
         m_pois = pois;
+        m_debug_reward_equals_G = debug_reward_equals_G;
     }
 
     std::vector<std::vector<int>> prep_all_or_nothing_influence() const {
@@ -144,17 +146,38 @@ class RewardComputer {
                     reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), m_rovers[i]->indirect_difference_parameters().m_manual);
                 }
                 else if (m_rovers[i]->indirect_difference_parameters().m_assignment == "automatic") {
+                    // Start with the influence table and go from there
+
+                    // One route where we are doing trajectory based
+                        // In this route, just tally it all up into one big influence set for each agent, and do the removal
+
+                    // Other route where we are doing timestep based
+                        // In this route, create sets at each time step. If someone was influenced, then put a stand-in for their state as 
+                        // a counterfactual. For instance (need to check if this will work), put -1,-1 as the position 
+                        // (or if that doesn't work, add a std::vector<boolean> that has 0 for removed at step i vs 1 for present at step i. Modify G to check this bool)
+
+
                     reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), influence_sets[i]);
                 }
+            }
+            if (m_debug_reward_equals_G && reward != G) {
+                throw std::runtime_error("reward does not equal G!");
             }
             rewards.push_back(reward);
         }
         return rewards;
     }
 
+    bool get_debug_reward_equals_G() {
+        return m_debug_reward_equals_G;
+    }
+
     Global m_Global;
     std::vector<Agent> m_rovers;
     std::vector<Entity> m_pois;
+
+    private:
+    bool m_debug_reward_equals_G; // private so you can't change it after the class has been initialized
 };
 
 }  // namespace rovers::rewards

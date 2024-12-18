@@ -28,13 +28,14 @@ class Environment {
     using Reward = std::vector<double>;
 
     Environment(InitPolicy initPolicy = InitPolicy(), std::vector<Agent> rovers = {},
-                std::vector<Entity> pois = {}, size_t width = 10.0, size_t height = 10.0)
+                std::vector<Entity> pois = {}, size_t width = 10.0, size_t height = 10.0,
+                bool debug_reward_equals_G = false)
         : m_initPolicy(initPolicy),
           m_rovers(std::move(rovers)),
           m_pois(std::move(pois)),
           m_width(width),
           m_height(height),
-          m_reward_computer(m_rovers, m_pois) {}
+          m_reward_computer(m_rovers, m_pois, debug_reward_equals_G) {}
 
     // helpers to set rovers/pois after the fact
     void set_rovers(std::vector<Agent> rovers) { m_rovers = std::move(rovers); }
