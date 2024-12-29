@@ -122,9 +122,10 @@ class Rover final : public IRover {
     using ActionType = Eigen::MatrixXd;
    public:
     Rover(IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
-        : IRover(indirect_difference_parameters, reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {
-        }
-        // There will be a reward type specified here
+        : IRover(indirect_difference_parameters, reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {}
+    // NOTE: This is commented out because I couldn't get it to work properly, but left as dead code to help me later if I need to get it working
+    // Rover(const Rover& rover)
+    //     : IRover(rover.indirect_difference_parameters(), rover.reward_type(), rover.type(), rover.obs_radius()), m_sensor(SensorType()), m_reward(RewardType()) {}
     [[nodiscard]] virtual Eigen::MatrixXd scan(const AgentPack& pack) const override {
         // std::cout << "Rover::scan()" << std::endl;
         return m_sensor->scan(pack);
