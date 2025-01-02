@@ -152,6 +152,73 @@ class RewardComputer {
         return allornothing_influence_array;
     }
 
+    /* Create system influence array that tells us when agent k was influenced 
+    by any agent in the system at a particular timestep
+    Indexing is [t][k] where t is the timestep and k is the agent being influenced
+    OPTIONAL: if agent i_ is specified, then we will not consider agent i_'s influence
+    as part of the system when constructing the system influence array
+    */
+    std::vector<std::vector<bool>> create_system_influence_array(
+        std::vector<std::vector<std::vector<bool>>> complete_influence_array,
+        int i_ = -1
+    ) const {
+        // Figure out how many timesteps in the path
+        int t_final = m_rovers[0]->path().size();
+
+        // Start with empty array
+        std::vector<std::vector<bool>> system_influence_array(
+            t_final, std::vector<bool>(
+                m_rovers.size(), 0
+            )
+        );
+
+        // Populate the array
+        for (int t=0; t < t_final; ++t) { // Iterate through time
+            for (int k=0; k < m_rovers.size(); ++k) { // Iterate through agents that were influenced this step
+                // If this agent was actually influenced this step, put a 1 for system influence. Else, leave it as 0
+                bool k_was_influenced = false;
+                for (int i=0; i < m_rovers.size(); ++i) {
+                    if (complete_influence_array[t][i][k] == 1 && (i_ == -1 || i_ != i)) {
+                        k_was_influenced = true;
+                    }
+                }
+                if (k_was_influenced) {
+                    system_influence_array[t][k] = 1;
+                }
+            }
+        }
+        return system_influence_array;
+    }
+
+    /* Create difference influence array that gives us the difference between two input arrays
+    We only get a 1 for influence if arr_x is 1 and arr_y is 0
+    Indexing is [t][k] where t is the timestep and k is the agent being influenced
+    */
+    std::vector<std::vector<bool>> create_difference_influence_array(
+        std::vector<std::vector<bool>> arr_x,
+        std::vector<std::vector<bool>> arr_y
+    ) const {
+        // Get timesteps
+        int t_final = m_rovers[0]->path().size();
+
+        // Initialize this array with all zeros
+        std::vector<std::vector<bool>> difference_influence_array(
+            t_final, std::vector<bool>(
+                m_rovers.size(), 0
+            )
+        );
+
+        // Now populate based on input influence arrays
+        for (int t=0; t < t_final; ++t) { // Iterate through time
+            for (int k=0; k < m_rovers.size(); ++k) { // Iterate through agents being influenced
+                if (arr_x[t][k] == 1 && arr_y[t][k] == 0) {
+                    difference_influence_array[t][k] = 1;
+                }
+            }
+        }
+        return difference_influence_array;
+    }
+
     /* Create a set of agents with paths that place that agent at [-1, -1] if that agent was influenced according to the input
     influence array */
     std::vector<Agent> create_counterfactual_rovers(std::vector<Agent> rovers, std::vector<std::vector<bool>> influence_array) const {
@@ -324,12 +391,40 @@ class RewardComputer {
                         // a counterfactual. For instance (need to check if this will work), put -1,-1 as the position 
                         // (or if that doesn't work, add a std::vector<boolean> that has 0 for removed at step i vs 1 for present at step i. Modify G to check this bool)
 
+                        // Construct the influence array telling us who to remove when using the specified method
+                        // std::vector<std::vector<bool>> influence_array = create_allornothing_influence_array(
+                        //         create_complete_influence_array(), i
+                        //     )
+                        std::vector<std::vector<bool>> influence_array;
+                        if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_credit == "Local") {
+                            influence_array = create_local_influence_array(
+                                create_complete_influence_array(), i
+                            );
+                        }
+                        else if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_credit == "AllOrNothing") {
+                            influence_array = create_allornothing_influence_array(
+                                create_complete_influence_array(), i
+                            );
+                        }
+                        else if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_credit == "System") {
+                            influence_array = create_system_influence_array(
+                                create_complete_influence_array()
+                            );
+                        }
+                        else if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_credit == "Difference") {
+                            // Start with the complete influence array
+                            std::vector<std::vector<std::vector<bool>>> complete_influence_array = create_complete_influence_array();
+                            // Figure out the system influence array
+                            std::vector<std::vector<bool>> system_influence_array = create_system_influence_array(complete_influence_array);
+                            // Now with agent i's influence removed
+                            std::vector<std::vector<bool>> counterfactual_system_influence_array = create_system_influence_array(complete_influence_array, i);
+                            // The difference between system influence with i vs system influence without i is the difference influence we want
+                            influence_array = create_difference_influence_array(system_influence_array, counterfactual_system_influence_array);
+                        }
+
                         // Construct a set of counterfactual agents that have paths where that agent is at [-1, -1] if it was influenced by another agent
                         std::vector<Agent> counterfactual_rovers = create_counterfactual_rovers(
-                            m_rovers,
-                            create_allornothing_influence_array(
-                                create_complete_influence_array(), i
-                            )
+                            m_rovers, influence_array
                         );
 
                         // Now compute d-indirect using these rovers
