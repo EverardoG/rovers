@@ -114,6 +114,10 @@ class Environment {
 
    private:
     inline void clamp_bounds(Agent& rover) {
+        // First check for agent specific bounds
+        rover->set_position(std::clamp(rover->position().x, rover->bounds().m_low_x, rover->bounds().m_high_x),
+                            std::clamp(rover->position().y, rover->bounds().m_low_y, rover->bounds().m_high_y));
+        // Then bound the agent by the map bounds
         rover->set_position(std::clamp(rover->position().x, 0.0, 1.0 * m_width),
                             std::clamp(rover->position().y, 0.0, 1.0 * m_height));
     }

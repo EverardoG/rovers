@@ -38,6 +38,20 @@ class IndirectDifferenceParameters {
     AutomaticParameters m_automatic_parameters;
 };
 
+class Bounds {
+    public:
+    Bounds(double low_x, double high_x, double low_y, double high_y) {
+        m_low_x = low_x;
+        m_high_x = high_x;
+        m_low_y = low_y;
+        m_high_y = high_y;
+    }
+
+    double m_low_x;
+    double m_high_x;
+    double m_low_y;
+    double m_high_y;
+};
 
 /*
  *
@@ -50,7 +64,7 @@ class IRover {
     using StateType = Eigen::MatrixXd;
 
    public:
-    IRover(IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0) : m_indirect_difference_parameters(indirect_difference_parameters), m_reward_type(reward_type), m_type(type_), m_obs_radius(obs_radius) {};
+    IRover(Bounds bounds, IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0) : m_bounds(bounds), m_indirect_difference_parameters(indirect_difference_parameters), m_reward_type(reward_type), m_type(type_), m_obs_radius(obs_radius) {};
     IRover(IRover&&) = default;
     IRover(const IRover&) = default;
     virtual ~IRover() = default;
@@ -95,6 +109,10 @@ class IRover {
         return m_indirect_difference_parameters;
     }
 
+    Bounds bounds() {
+        return m_bounds;
+    }
+
     // [TODO] temp cppyy super().__init__() fix
     virtual void act(const ActionType&) {}
 
@@ -108,6 +126,7 @@ class IRover {
     Point m_position;
     std::vector<Point> m_path;
     IndirectDifferenceParameters m_indirect_difference_parameters;
+    Bounds m_bounds;
 };
 
 /*
@@ -121,8 +140,8 @@ class Rover final : public IRover {
     using RType = thyme::utilities::SharedWrap<RewardType>;
     using ActionType = Eigen::MatrixXd;
    public:
-    Rover(IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
-        : IRover(indirect_difference_parameters, reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {}
+    Rover(Bounds bounds, IndirectDifferenceParameters indirect_difference_parameters, std::string reward_type, std::string type_, double obs_radius = 1.0, SType sensor = SensorType(), RType reward = RewardType())
+        : IRover(bounds, indirect_difference_parameters, reward_type, type_, obs_radius), m_sensor(sensor), m_reward(reward) {}
     // NOTE: This is commented out because I couldn't get it to work properly, but left as dead code to help me later if I need to get it working
     // Rover(const Rover& rover)
     //     : IRover(rover.indirect_difference_parameters(), rover.reward_type(), rover.type(), rover.obs_radius()), m_sensor(SensorType()), m_reward(RewardType()) {}

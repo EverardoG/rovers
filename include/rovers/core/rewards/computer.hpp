@@ -232,6 +232,7 @@ class RewardComputer {
         // Clear the path of each one
         for (int k=0; k < rovers.size(); ++k) {
             Rover<Lidar<Density>, thyme::spaces::Discrete, rewards::Global> rover(
+                rovers[k]->bounds(),
                 rovers[k]->indirect_difference_parameters(),
                 rovers[k]->reward_type(),
                 rovers[k]->type(),
