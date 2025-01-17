@@ -443,6 +443,9 @@ class RewardComputer {
                     }
                 }
             }
+            if (m_rovers[i]->indirect_difference_parameters().m_add_G) {
+                reward = reward + G;
+            }
             if (m_debug_reward_equals_G && reward != G) {
                 throw std::runtime_error("reward does not equal G!");
             }

@@ -25,17 +25,19 @@ class AutomaticParameters {
 
 class IndirectDifferenceParameters {
     public:
-    IndirectDifferenceParameters(std::string type_, std::string assignment, std::vector<int> manual, AutomaticParameters automatic_parameters) {
+    IndirectDifferenceParameters(std::string type_, std::string assignment, std::vector<int> manual, AutomaticParameters automatic_parameters, bool add_G) {
         m_type = type_;
         m_assignment = assignment;
         m_manual = manual;
         m_automatic_parameters = automatic_parameters;
+        m_add_G = add_G;
     }
 
     std::string m_type;
     std::string m_assignment;
     std::vector<int> m_manual;
     AutomaticParameters m_automatic_parameters;
+    bool m_add_G;
 };
 
 class Bounds {
