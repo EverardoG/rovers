@@ -439,11 +439,15 @@ class RewardComputer {
                     // Trajectory based removal
                     else if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_timescale == "trajectory") {
                         if (m_rovers[i]->indirect_difference_parameters().m_automatic_parameters.m_credit == "Random") {
-                            // Here we remove yourself and flip a coin to see if you remove your 0th teammate
+                            // Here we remove yourself and flip a coin for each teammate specified in manual to see if you remove that teammate as well
                             std::vector<int> inds;
                             inds.push_back(i);
-                            if (std::rand() % 2 == 0) {
-                                inds.push_back(0);
+                            // Iterate through specified teammates
+                            for (const int& j : m_rovers[i]->indirect_difference_parameters().m_manual) {
+                                // Flip a coin
+                                if (std::rand() % 2 == 0) {
+                                    inds.push_back(j);
+                                }
                             }
                             reward = G - m_Global.compute_without_inds(AgentPack(0, m_rovers, m_pois), inds);
                         }
